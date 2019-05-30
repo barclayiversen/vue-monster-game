@@ -11,55 +11,93 @@ new Vue({
     char: "",
     timerRunning: false,
     gameResult: false,
-    winning: 0
-  },
-  ready: function() {
-    var vm = this;
-     window.addEventListener('keyup', function(event) {
-       // If down arrow was pressed...
-       if (event.keyCode == 40) {
-         vm.$broadcast('down-arrow-pressed');
-       }
-     });
+    winning: 0,
+    turns: []
   },
   methods: {
     startGame: function() {
       this.gameIsRunning = true;
       this.playerHealth = 100;
       this.monsterHealth = 100;
+      this.turns = [];
     },
     attack: function() {
-      var max = 10;
-      var min = 3;
-      var damage = Math.max(Math.floor(Math.random() * max) + 1, min);
+      var damage = this.calculateDamage(4, 10);
       this.monsterHealth -= damage;
-
-      if (this.monsterHealth <= 0) {
-        alert('You won!');
-        this.gameIsRunning = false;
+      this.turns.unshift({
+        isPlayer: true,
+        text: 'Player hits Monster for ' + damage + ' damage'
+      });
+      if (this.checkWin()) {
         return;
       }
 
-      max = 11;
-      min = 4;
-      damage = Math.max(Math.floor(Math.random() * max) + 1, min);
-      this.playerHealth -= damage;
-
-      if (this.playerHealth <= 0) {
-        alert('You lost');
-        this.gameIsRunning = false;
-        return;
-      }
+      this.monsterAttacks();
 
     },
     specialAttack: function() {
+      var damage = this.calculateDamage(8, 15);
+      this.monsterHealth -= damage
+      this.turns.unshift({
+        isPlayer: true,
+        text: 'Player hits Monster with special for ' + damage + ' damage'
+      });
+      if (this.checkWin()) {
+        return;
+      }
+
+      this.monsterAttacks();
 
     },
     heal: function() {
+      if (this.playerHealth <= 90) {
+        this.playerHealth += 10
+      } else {
+        this.playerHealth = 100;
+      }
+      this.turns.unshift({
+        isPlayer: true,
+        text: 'Player heals 10 damage'
+      });
+      this.monsterAttacks();
 
     },
     giveUp: function() {
+      this.gameIsRunning = false;
+    },
+    calculateDamage: function(min, max) {
+      return Math.max(Math.floor(Math.random() * max) + 1, min);
+    },
+    checkWin: function() {
 
+      if (this.monsterHealth <= 0) {
+
+        if (confirm('You won! New Game?')) {
+          this.startGame();
+        } else {
+          this.gameIsRunning = false;
+        }
+        return true;
+
+      } else if (this.playerHealth <= 0) {
+        if (confirm('You lost! New Game?')) {
+          this.startGame();
+        } else {
+          this.gameIsRunning = false;
+        }
+        return true;
+      }
+
+      return false;
+    },
+    monsterAttacks: function() {
+      var damage = this.calculateDamage(6, 12);
+      this.playerHealth -= damage
+      this.turns.unshift({
+        isPlayer: false,
+        text: 'Monster hits Player for ' + damage + ' damage'
+      });
+      this.checkWin();
     },
     becomeAdept: function() {
       var vm = this;
