@@ -40,20 +40,12 @@
             <button id="becomeAdept" @click="becomeAdept">Play the game</button>
         </div>
     </section>
-    <section class="row log">
-      <template v-if="displayKey">
-        <h1 v-show="key == 0">Get ready...</h1>
-        <h1 v-show="key != 0">Press the "{{ char }}" key</h1>
-        <span v-if="gameResult == true">
-          <h1 v-show="winning == 1">Correct</h1>
-          <h1 v-show="winning == 0">Oops you press the {{ pressedKey }} key</h1
-        </span>
-
-      </template>
+    <section class="row log" v-if="turns.length > 0">
         <div class="small-12 columns">
             <ul>
-                <li>
-
+                <li v-for="turn in turns"
+                    :class="{'player-turn': turn.isPlayer, 'monster-turn': !turn.isPlayer}">
+                  {{ turn.text }}
                 </li>
             </ul>
         </div>
